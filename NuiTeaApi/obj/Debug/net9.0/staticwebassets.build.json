@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "95vNSgjMzHYbSxu8ieiTmjdWYsS9Ay1iYC7vbJ36bEo=",
+  "Source": "NuiTeaApi",
+  "BasePath": "_content/NuiTeaApi",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

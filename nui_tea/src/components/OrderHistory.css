@@ -1,0 +1,261 @@
+.order-history-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.order-history-modal {
+    background: white;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.order-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    background: #f8f9fa;
+}
+
+.order-history-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.close-button:hover {
+    background-color: #e9ecef;
+    color: #333;
+}
+
+.order-history-content {
+    padding: 20px;
+    max-height: calc(90vh - 100px);
+    overflow-y: auto;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.no-orders {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.no-orders p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.order-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    background: #fff;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.order-info h3 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.order-date {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.order-status {
+    padding: 5px 12px;
+    border-radius: 20px;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.order-items {
+    margin-bottom: 15px;
+}
+
+.order-product {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    gap: 10px;
+}
+
+.order-product:last-child {
+    border-bottom: none;
+}
+
+.product-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.product-image {
+    width: 50px !important;
+    height: 50px !important;
+    object-fit: cover !important;
+    border-radius: 6px !important;
+    flex-shrink: 0;
+}
+
+.product-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.product-details h4 {
+    margin: 0 0 3px 0;
+    color: #333;
+    font-size: 0.95rem;
+    word-wrap: break-word;
+}
+
+.product-details p {
+    margin: 1px 0;
+    color: #666;
+    font-size: 0.8rem;
+    word-wrap: break-word;
+}
+
+.product-price {
+    font-weight: 600;
+    color: #e74c3c;
+    font-size: 1rem;
+}
+
+.order-summary {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.summary-row:last-child {
+    margin-bottom: 0;
+}
+
+.summary-row.discount {
+    color: #28a745;
+}
+
+.summary-row.total {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #e74c3c;
+    border-top: 1px solid #ddd;
+    padding-top: 8px;
+    margin-top: 8px;
+}
+
+.order-details {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.order-details p {
+    margin: 5px 0;
+    color: #333;
+}
+
+.order-details strong {
+    color: #555;
+}
+
+@media (max-width: 768px) {
+    .order-history-modal {
+        width: 95%;
+        margin: 10px;
+    }
+
+    .order-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .product-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .product-image {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    .product-details h4 {
+        font-size: 0.9rem;
+    }
+
+    .product-details p {
+        font-size: 0.75rem;
+    }
+}
