@@ -422,3 +422,4 @@ C:\Users\LENOVO\Downloads\NUiTeaplus\NuiTeaApi\obj\Debug\net9.0\refint\NuiTeaApi
 C:\Users\LENOVO\Downloads\NUiTeaplus\NuiTeaApi\obj\Debug\net9.0\NuiTeaApi.pdb
 C:\Users\LENOVO\Downloads\NUiTeaplus\NuiTeaApi\obj\Debug\net9.0\NuiTeaApi.genruntimeconfig.cache
 C:\Users\LENOVO\Downloads\NUiTeaplus\NuiTeaApi\obj\Debug\net9.0\ref\NuiTeaApi.dll
+C:\Users\LENOVO\Downloads\NUiTeaplus\NuiTeaApi\obj\Debug\net9.0\NuiTeaApi.sourcelink.json

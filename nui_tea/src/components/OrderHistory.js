@@ -12,7 +12,10 @@ const OrderHistory = ({ isOpen, onClose, user }) => {
     }, [isOpen, user]);
 
     const fetchOrders = async () => {
-        if (!user || !user.email) return;
+        if (!user || !user.email) {
+            console.log('User or user.email is null:', user);
+            return;
+        }
 
         setLoading(true);
         try {

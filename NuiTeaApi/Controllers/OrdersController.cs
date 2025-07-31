@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NuiTeaApi.Models;
+using System.Linq;
 
 namespace NuiTeaApi.Controllers
 {
@@ -17,17 +18,17 @@ namespace NuiTeaApi.Controllers
 
         // Lấy tất cả đơn hàng (cho admin)
         [HttpGet]
-        public async Task<IActionResult> GetOrders([FromQuery] string customerPhone = null)
+        public async Task<IActionResult> GetOrders([FromQuery] string? customerEmail = null)
         {
             try
             {
                 var query = _context.Orders.AsQueryable();
                 
-                // Nếu có customerPhone, chỉ lấy đơn hàng của khách hàng đó
-                if (!string.IsNullOrEmpty(customerPhone))
+                // Nếu có customerEmail, chỉ lấy đơn hàng của khách hàng đó
+                if (!string.IsNullOrEmpty(customerEmail))
                 {
-                    query = query.Where(o => o.Email == customerPhone); // Sử dụng email để lọc
-                    Console.WriteLine($"Filtering orders by email: {customerPhone}");
+                    query = query.Where(o => o.Email == customerEmail);
+                    Console.WriteLine($"Filtering orders by email: {customerEmail}");
                 }
                 
                 var orders = await query
@@ -37,19 +38,19 @@ namespace NuiTeaApi.Controllers
                 var result = orders.Select(order => new
                 {
                     id = order.Id,
-                    orderNumber = order.OrderNumber,
-                    customerName = order.CustomerName,
-                    phone = order.Phone,
-                    address = order.Address,
+                    orderNumber = order.OrderNumber ?? "",
+                    customerName = order.CustomerName ?? "",
+                    phone = order.Phone ?? "",
+                    address = order.Address ?? "",
                     totalAmount = order.TotalAmount,
-                    paymentMethod = order.PaymentMethod,
-                    paymentStatus = order.PaymentStatus,
-                    orderStatus = order.OrderStatus,
+                    paymentMethod = order.PaymentMethod ?? "",
+                    paymentStatus = order.PaymentStatusString ?? "Pending",
+                    orderStatus = order.OrderStatusString ?? "Pending",
                     createdAt = order.CreatedAt,
                     estimatedDelivery = order.EstimatedDelivery,
                     completedAt = order.CompletedAt,
-                    note = order.Note,
-                    couponCode = order.CouponCode,
+                    note = order.Note ?? "",
+                    couponCode = order.CouponCode ?? "",
                     discountAmount = order.DiscountAmount,
                     items = order.GetItems()
                 });
@@ -75,19 +76,19 @@ namespace NuiTeaApi.Controllers
                 var result = new
                 {
                     id = order.Id,
-                    orderNumber = order.OrderNumber,
-                    customerName = order.CustomerName,
-                    phone = order.Phone,
-                    address = order.Address,
+                    orderNumber = order.OrderNumber ?? "",
+                    customerName = order.CustomerName ?? "",
+                    phone = order.Phone ?? "",
+                    address = order.Address ?? "",
                     totalAmount = order.TotalAmount,
-                    paymentMethod = order.PaymentMethod,
-                    paymentStatus = order.PaymentStatus,
-                    orderStatus = order.OrderStatus,
+                    paymentMethod = order.PaymentMethod ?? "",
+                    paymentStatus = order.PaymentStatusString ?? "Pending",
+                    orderStatus = order.OrderStatusString ?? "Pending",
                     createdAt = order.CreatedAt,
                     estimatedDelivery = order.EstimatedDelivery,
                     completedAt = order.CompletedAt,
-                    note = order.Note,
-                    couponCode = order.CouponCode,
+                    note = order.Note ?? "",
+                    couponCode = order.CouponCode ?? "",
                     discountAmount = order.DiscountAmount,
                     items = order.GetItems()
                 };
@@ -137,8 +138,8 @@ namespace NuiTeaApi.Controllers
                     Note = request.Note,
                     TotalAmount = request.TotalAmount,
                     PaymentMethod = request.PaymentMethod,
-                    PaymentStatus = request.PaymentStatus,
-                    OrderStatus = request.OrderStatus,
+                    PaymentStatusString = request.PaymentStatus,
+                    OrderStatusString = request.OrderStatus,
                     CreatedAt = DateTime.Now,
                     EstimatedDelivery = DateTime.Now.AddMinutes(30),
                     CouponCode = request.CouponCode,
@@ -176,9 +177,9 @@ namespace NuiTeaApi.Controllers
                 if (order == null)
                     return NotFound(new { error = "Không tìm thấy đơn hàng" });
 
-                order.OrderStatus = request.OrderStatus;
+                order.OrderStatusString = request.OrderStatus;
                 
-                if (request.OrderStatus == "Đã giao hàng")
+                if (request.OrderStatus == "Completed")
                 {
                     order.CompletedAt = DateTime.Now;
                 }
@@ -187,7 +188,7 @@ namespace NuiTeaApi.Controllers
 
                 return Ok(new { 
                     message = "Cập nhật trạng thái đơn hàng thành công",
-                    orderStatus = order.OrderStatus
+                    orderStatus = order.OrderStatusString
                 });
             }
             catch (Exception ex)
@@ -206,12 +207,12 @@ namespace NuiTeaApi.Controllers
                 if (order == null)
                     return NotFound(new { error = "Không tìm thấy đơn hàng" });
 
-                order.PaymentStatus = request.PaymentStatus;
+                order.PaymentStatusString = request.PaymentStatus;
                 await _context.SaveChangesAsync();
 
                 return Ok(new { 
                     message = "Cập nhật trạng thái thanh toán thành công",
-                    paymentStatus = order.PaymentStatus
+                    paymentStatus = order.PaymentStatusString
                 });
             }
             catch (Exception ex)

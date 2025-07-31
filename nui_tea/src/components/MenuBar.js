@@ -21,6 +21,11 @@ function MenuBar({ user, setUser, setPage, onMenuScroll, setShowLogin, setShowCa
     }
 
     const checkNotifications = async () => {
+      if (!user || !user.email) {
+        console.log('User or user.email is null in MenuBar:', user);
+        return;
+      }
+      
       try {
         const response = await fetch(`http://localhost:5249/api/orders?customerEmail=${encodeURIComponent(user.email)}`);
         if (response.ok) {

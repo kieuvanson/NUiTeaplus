@@ -72,6 +72,9 @@ export default function FeaturedProducts({ products }) {
                         <div className="product-info">
                             <h3 className="product-name">{product.name}</h3>
                             <p className="product-desc">{product.description}</p>
+                            <div className="product-price">
+                                {product.price?.toLocaleString()}đ
+                            </div>
                             <button
                                 className="order-btn"
                                 onClick={() => handleShowOption(product)}
@@ -131,6 +134,9 @@ export default function FeaturedProducts({ products }) {
                         <div className="product-info">
                             <h3 className="product-name">{product.name}</h3>
                             <p className="product-desc">{product.description}</p>
+                            <div className="product-price">
+                                {product.price?.toLocaleString()}đ
+                            </div>
                             <button
                                 className="order-btn"
                                 onClick={() => handleShowOption(product)}
