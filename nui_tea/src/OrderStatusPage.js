@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MenuBar from './components/MenuBar';
-import { useCart } from './contexts/CartContext';
-import LoginModal from './components/LoginModal';
-import CartModal from './components/CartModal';
 
 export default function OrderStatusPage() {
     const { orderId } = useParams();
@@ -11,49 +8,36 @@ export default function OrderStatusPage() {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [user, setUser] = useState(null);
-    const [showLogin, setShowLogin] = useState(false);
-    const [showCart, setShowCart] = useState(false);
-    const { cart } = useCart();
-
-    // Load user from localStorage
-    useEffect(() => {
-        const savedUser = localStorage.getItem('nui_tea_user');
-        if (savedUser) {
-            try {
-                setUser(JSON.parse(savedUser));
-            } catch (error) {
-                console.error('Error parsing user data:', error);
-            }
-        }
-    }, []);
 
     useEffect(() => {
-        const fetchOrderDetails = async () => {
-            try {
-                console.log('Fetching order details for ID:', orderId);
-                const response = await fetch(`http://localhost:5249/api/orders/${orderId}`);
+        // Lấy dữ liệu đơn hàng từ localStorage
+        const savedOrder = localStorage.getItem('currentOrder');
+        console.log('Saved order from localStorage:', savedOrder);
+        console.log('Current orderId from URL:', orderId);
 
-                if (response.ok) {
-                    const orderData = await response.json();
-                    console.log('Fetched order data:', orderData);
+        if (savedOrder) {
+            try {
+                const orderData = JSON.parse(savedOrder);
+                console.log('Parsed order data:', orderData);
+                console.log('Comparing orderData.id:', orderData.id, 'with orderId:', orderId);
+
+                // Kiểm tra xem có phải đơn hàng hiện tại không
+                if (orderData.id.toString() === orderId || orderData.id === parseInt(orderId)) {
                     setOrder(orderData);
+                    setLoading(false);
                 } else {
-                    console.error('Failed to fetch order:', response.status);
+                    console.log('Order ID mismatch. Expected:', orderId, 'Found:', orderData.id);
                     setError('Không tìm thấy thông tin đơn hàng');
+                    setLoading(false);
                 }
             } catch (error) {
-                console.error('Error fetching order:', error);
-                setError('Lỗi kết nối server');
-            } finally {
+                console.error('Error parsing order data:', error);
+                setError('Lỗi đọc dữ liệu đơn hàng');
                 setLoading(false);
             }
-        };
-
-        if (orderId) {
-            fetchOrderDetails();
         } else {
-            setError('ID đơn hàng không hợp lệ');
+            console.log('No saved order found in localStorage');
+            setError('Không tìm thấy thông tin đơn hàng');
             setLoading(false);
         }
     }, [orderId]);
@@ -83,13 +67,7 @@ export default function OrderStatusPage() {
     if (loading) {
         return (
             <div style={{ minHeight: '100vh', background: '#f6f5f3' }}>
-                <MenuBar
-                    user={user}
-                    setUser={setUser}
-                    setShowLogin={setShowLogin}
-                    setShowCart={setShowCart}
-                    setPage={() => { }}
-                />
+                <MenuBar />
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -107,13 +85,7 @@ export default function OrderStatusPage() {
     if (error) {
         return (
             <div style={{ minHeight: '100vh', background: '#f6f5f3' }}>
-                <MenuBar
-                    user={user}
-                    setUser={setUser}
-                    setShowLogin={setShowLogin}
-                    setShowCart={setShowCart}
-                    setPage={() => { }}
-                />
+                <MenuBar />
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -130,13 +102,7 @@ export default function OrderStatusPage() {
 
     return (
         <div style={{ minHeight: '100vh', background: '#f6f5f3' }}>
-            <MenuBar
-                user={user}
-                setUser={setUser}
-                setShowLogin={setShowLogin}
-                setShowCart={setShowCart}
-                setPage={() => { }}
-            />
+            <MenuBar />
 
             <div style={{
                 maxWidth: 800,
@@ -251,94 +217,83 @@ export default function OrderStatusPage() {
                     </h3>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        {order.items && Array.isArray(order.items) && order.items.length > 0 ? (
-                            order.items.map((item, index) => (
-                                <div key={index} style={{
+                        {order.items.map((item, index) => (
+                            <div key={index} style={{
+                                display: 'flex',
+                                gap: 16,
+                                padding: '16px 0',
+                                borderBottom: index < order.items.length - 1 ? '1px solid #eee' : 'none'
+                            }}>
+                                <div style={{
+                                    width: 60,
+                                    height: 60,
+                                    background: '#f8f8f8',
+                                    borderRadius: 8,
                                     display: 'flex',
-                                    gap: 16,
-                                    padding: '16px 0',
-                                    borderBottom: order.items && index < order.items.length - 1 ? '1px solid #eee' : 'none'
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: 24,
+                                    overflow: 'hidden'
                                 }}>
+                                    {item.image ? (
+                                        <img
+                                            src={item.image}
+                                            alt={item.name}
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover'
+                                            }}
+                                        />
+                                    ) : (
+                                        item.emoji || '🍵'
+                                    )}
+                                </div>
+
+                                <div style={{ flex: 1 }}>
                                     <div style={{
-                                        width: 60,
-                                        height: 60,
-                                        background: '#f8f8f8',
-                                        borderRadius: 8,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: 24,
-                                        overflow: 'hidden'
+                                        fontWeight: 600,
+                                        fontSize: 16,
+                                        marginBottom: 4
                                     }}>
-                                        {item.productImage ? (
-                                            <img
-                                                src={item.productImage}
-                                                alt={item.productName}
-                                                style={{
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    objectFit: 'cover'
-                                                }}
-                                            />
-                                        ) : (
-                                            '🍵'
-                                        )}
+                                        {item.name}
                                     </div>
-
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{
-                                            fontWeight: 600,
-                                            fontSize: 16,
-                                            marginBottom: 4
-                                        }}>
-                                            {item.productName}
-                                        </div>
-                                        <div style={{
-                                            fontSize: 14,
-                                            color: '#666',
-                                            marginBottom: 4
-                                        }}>
-                                            {item.options?.size ? `${item.options.size} | ` : ''}
-                                            {item.options?.type ? `${item.options.type === 'lanh' ? 'Lạnh' : 'Nóng'} | ` : ''}
-                                            {item.options?.sugar ? `${item.options.sugar}` : ''}
-                                        </div>
-                                        {item.options?.toppings && item.options.toppings.length > 0 && (
-                                            <div style={{
-                                                fontSize: 13,
-                                                color: '#b8860b'
-                                            }}>
-                                                Topping: {item.options.toppings.join(', ')}
-                                            </div>
-                                        )}
+                                    <div style={{
+                                        fontSize: 14,
+                                        color: '#666',
+                                        marginBottom: 4
+                                    }}>
+                                        {item.options?.size ? `${item.options.size} | ` : ''}
+                                        {item.options?.type ? `${item.options.type === 'lanh' ? 'Lạnh' : 'Nóng'} | ` : ''}
+                                        {item.options?.sugar ? `${item.options.sugar}` : ''}
                                     </div>
+                                    {item.options?.toppings && item.options.toppings.length > 0 && (
+                                        <div style={{
+                                            fontSize: 13,
+                                            color: '#b8860b'
+                                        }}>
+                                            Topping: {item.options.toppings.join(', ')}
+                                        </div>
+                                    )}
+                                </div>
 
-                                    <div style={{ textAlign: 'right' }}>
-                                        <div style={{
-                                            fontWeight: 600,
-                                            color: '#b8860b',
-                                            fontSize: 16
-                                        }}>
-                                            {item.price.toLocaleString()}đ
-                                        </div>
-                                        <div style={{
-                                            fontSize: 14,
-                                            color: '#666'
-                                        }}>
-                                            x{item.quantity}
-                                        </div>
+                                <div style={{ textAlign: 'right' }}>
+                                    <div style={{
+                                        fontWeight: 600,
+                                        color: '#b8860b',
+                                        fontSize: 16
+                                    }}>
+                                        {item.price.toLocaleString()}đ
+                                    </div>
+                                    <div style={{
+                                        fontSize: 14,
+                                        color: '#666'
+                                    }}>
+                                        x{item.quantity}
                                     </div>
                                 </div>
-                            ))
-                        ) : (
-                            <div style={{
-                                textAlign: 'center',
-                                padding: '20px',
-                                color: '#666',
-                                fontSize: '16px'
-                            }}>
-                                Không có thông tin sản phẩm
                             </div>
-                        )}
+                        ))}
                     </div>
                 </div>
 
@@ -458,24 +413,6 @@ export default function OrderStatusPage() {
                     </button>
                 </div>
             </div>
-
-            {/* Modals */}
-            {showLogin && (
-                <LoginModal
-                    onClose={() => setShowLogin(false)}
-                    onLogin={(userData) => {
-                        setUser(userData);
-                        setShowLogin(false);
-                    }}
-                />
-            )}
-
-            {showCart && (
-                <CartModal
-                    onClose={() => setShowCart(false)}
-                    user={user}
-                />
-            )}
         </div>
     );
 } 

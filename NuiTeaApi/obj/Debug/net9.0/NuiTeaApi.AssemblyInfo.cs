@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NuiTeaApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+44c1c93e8437b65d40db21711a9db4209ee0e2fc")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7ffcdbd31721cb51138e940ea96fd083b8b8934b")]
 [assembly: System.Reflection.AssemblyProductAttribute("NuiTeaApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NuiTeaApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

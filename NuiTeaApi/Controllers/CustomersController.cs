@@ -18,89 +18,6 @@ namespace NuiTeaApi.Controllers
             _context = context;
         }
 
-        // GET: api/customers
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            try
-            {
-                // Kiểm tra xem có dữ liệu không
-                var customerCount = await _context.Customers.CountAsync();
-                
-                if (customerCount == 0)
-                {
-                    // Tạo dữ liệu test nếu không có
-                    var testCustomers = new List<Customer>
-                    {
-                        new Customer
-                        {
-                            Username = "admin",
-                            Email = "admin@nuitea.com",
-                            PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"),
-                            FullName = "Admin Nui Tea",
-                            Phone = "0123456789",
-                            Address = "123 Đường ABC, Quận 1, TP.HCM",
-                            Role = "admin",
-                            IsActive = true,
-                            CreatedAt = DateTime.Now,
-                            UpdatedAt = DateTime.Now
-                        },
-                        new Customer
-                        {
-                            Username = "user1",
-                            Email = "user1@example.com",
-                            PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"),
-                            FullName = "Nguyễn Văn A",
-                            Phone = "0987654321",
-                            Address = "456 Đường XYZ, Quận 2, TP.HCM",
-                            Role = "user",
-                            IsActive = true,
-                            CreatedAt = DateTime.Now,
-                            UpdatedAt = DateTime.Now
-                        },
-                        new Customer
-                        {
-                            Username = "user2",
-                            Email = "user2@example.com",
-                            PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"),
-                            FullName = "Trần Thị B",
-                            Phone = "0369852147",
-                            Address = "789 Đường DEF, Quận 3, TP.HCM",
-                            Role = "user",
-                            IsActive = false,
-                            CreatedAt = DateTime.Now,
-                            UpdatedAt = DateTime.Now
-                        }
-                    };
-                    
-                    _context.Customers.AddRange(testCustomers);
-                    await _context.SaveChangesAsync();
-                }
-                
-                var customers = await _context.Customers
-                    .Select(c => new
-                    {
-                        c.Id,
-                        c.Username,
-                        c.Email,
-                        c.FullName,
-                        c.Phone,
-                        c.Address,
-                        c.Role,
-                        c.IsActive,
-                        c.CreatedAt,
-                        c.UpdatedAt
-                    })
-                    .ToListAsync();
-                
-                return Ok(customers);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi server: " + ex.Message });
-            }
-        }
-
         // POST: api/customers/register
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest req)
@@ -158,6 +75,82 @@ namespace NuiTeaApi.Controllers
             });
         }
 
+        // GET: api/customers
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            try
+            {
+                var customers = await _context.Customers
+                    .Select(c => new
+                    {
+                        c.Id,
+                        c.Username,
+                        c.Email,
+                        c.FullName,
+                        c.Phone,
+                        c.Address,
+                        c.Role,
+                        c.IsActive,
+                        c.CreatedAt,
+                        c.UpdatedAt
+                    })
+                    .ToListAsync();
+
+                return Ok(customers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi server: " + ex.Message });
+            }
+        }
+
+        // PUT: api/customers/{id}/toggle-status
+        [HttpPut("{id}/toggle-status")]
+        public async Task<IActionResult> ToggleStatus(int id)
+        {
+            try
+            {
+                var customer = await _context.Customers.FindAsync(id);
+                if (customer == null)
+                    return NotFound(new { message = "Không tìm thấy tài khoản." });
+
+                customer.IsActive = !customer.IsActive;
+                customer.UpdatedAt = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                return Ok(new { 
+                    message = customer.IsActive ? "Mở khóa tài khoản thành công." : "Khóa tài khoản thành công.",
+                    customer 
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi server: " + ex.Message });
+            }
+        }
+
+        // DELETE: api/customers/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var customer = await _context.Customers.FindAsync(id);
+                if (customer == null)
+                    return NotFound(new { message = "Không tìm thấy tài khoản." });
+
+                _context.Customers.Remove(customer);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Xóa tài khoản thành công." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi server: " + ex.Message });
+            }
+        }
+
         // PUT: api/customers/update
         [HttpPut("update")]
         public async Task<IActionResult> Update([FromBody] UpdateRequest req)
@@ -202,52 +195,6 @@ namespace NuiTeaApi.Controllers
             public string? Username { get; set; }
             public string? Phone { get; set; }
             public string? Address { get; set; }
-        }
-
-        // PUT: api/customers/{id}/toggle-status
-        [HttpPut("{id}/toggle-status")]
-        public async Task<IActionResult> ToggleStatus(int id)
-        {
-            try
-            {
-                var customer = await _context.Customers.FindAsync(id);
-                if (customer == null)
-                    return NotFound(new { message = "Không tìm thấy tài khoản." });
-
-                customer.IsActive = !customer.IsActive;
-                customer.UpdatedAt = DateTime.Now;
-                await _context.SaveChangesAsync();
-
-                return Ok(new { 
-                    message = customer.IsActive ? "Đã mở khóa tài khoản." : "Đã khóa tài khoản.",
-                    customer.IsActive 
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi server: " + ex.Message });
-            }
-        }
-
-        // DELETE: api/customers/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            try
-            {
-                var customer = await _context.Customers.FindAsync(id);
-                if (customer == null)
-                    return NotFound(new { message = "Không tìm thấy tài khoản." });
-
-                _context.Customers.Remove(customer);
-                await _context.SaveChangesAsync();
-
-                return Ok(new { message = "Đã xóa tài khoản thành công." });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Lỗi server: " + ex.Message });
-            }
         }
     }
 }

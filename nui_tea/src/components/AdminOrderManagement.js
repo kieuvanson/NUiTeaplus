@@ -122,7 +122,7 @@ export default function AdminOrderManagement() {
 
     if (loading) {
         return (
-            <div style={{ padding: '10px 5px', textAlign: 'center' }}>
+            <div style={{ padding: '20px', textAlign: 'center' }}>
                 <div>Đang tải danh sách đơn hàng...</div>
             </div>
         );
@@ -130,7 +130,7 @@ export default function AdminOrderManagement() {
 
     if (error) {
         return (
-            <div style={{ padding: '10px 5px', textAlign: 'center', color: 'red' }}>
+            <div style={{ padding: '20px', textAlign: 'center', color: 'red' }}>
                 <div>{error}</div>
                 <button onClick={fetchOrders} style={{ marginTop: '10px', padding: '8px 16px' }}>
                     Thử lại
@@ -140,7 +140,7 @@ export default function AdminOrderManagement() {
     }
 
     return (
-        <div style={{ padding: '10px 5px' }}>
+        <div style={{ padding: '20px' }}>
             <h2 style={{ color: '#b8860b', marginBottom: '20px' }}>Quản lý đơn hàng</h2>
 
             {orders.length === 0 ? (
@@ -153,7 +153,7 @@ export default function AdminOrderManagement() {
                         <div key={order.id} style={{
                             background: '#fff',
                             borderRadius: '12px',
-                            padding: '16px',
+                            padding: '20px',
                             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                             border: '1px solid #eee'
                         }}>

@@ -284,6 +284,12 @@ function AdminPage() {
   const [showAddMaterial, setShowAddMaterial] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
   const [showMaterialDetail, setShowMaterialDetail] = useState(false);
+  const [showEditMaterial, setShowEditMaterial] = useState(false);
+
+  // State cho thông báo admin
+  const [adminNotifications, setAdminNotifications] = useState([]);
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [showAdminNotifications, setShowAdminNotifications] = useState(false);
 
   // Hàm toggle Sold Out
   const toggleSoldOut = async (productId) => {
@@ -337,12 +343,12 @@ function AdminPage() {
     }
   };
 
-    // Hàm xóa tài khoản
+  // Hàm xóa tài khoản
   const deleteAccount = async (accountId) => {
     if (!window.confirm('Bạn có chắc chắn muốn xóa tài khoản này?')) {
       return;
     }
-    
+
     try {
       const response = await fetch(`http://localhost:5249/api/customers/${accountId}`, {
         method: 'DELETE',
@@ -426,7 +432,7 @@ function AdminPage() {
     if (!window.confirm('Bạn có chắc chắn muốn xóa nguyên vật liệu này?')) {
       return;
     }
-    
+
     try {
       const response = await fetch(`http://localhost:5249/api/materials/${materialId}`, {
         method: 'DELETE',
@@ -488,6 +494,28 @@ function AdminPage() {
           setMaterialsError('Không thể tải danh sách nguyên vật liệu');
           setMaterialsLoading(false);
         });
+
+      // Luôn lấy thông báo admin khi chuyển tab
+      fetch('http://localhost:5249/api/adminnotifications/materials')
+        .then(res => res.json())
+        .then(data => {
+          console.log('AdminNotifications response:', data);
+          setAdminNotifications(Array.isArray(data.notifications) ? data.notifications : []);
+        })
+        .catch((error) => {
+          console.error('AdminNotifications error:', error);
+          setAdminNotifications([]);
+        });
+
+      // Lấy thống kê dashboard
+      fetch('http://localhost:5249/api/adminnotifications/dashboard-stats')
+        .then(res => res.json())
+        .then(data => {
+          setDashboardStats(data);
+        })
+        .catch(() => {
+          setDashboardStats(null);
+        });
     }
   }, [tab]);
 
@@ -507,6 +535,49 @@ function AdminPage() {
           <span style={{ fontSize: 30, fontWeight: 900, color: '#7c4d03', letterSpacing: 1, lineHeight: 1 }}>Nui Tea <span style={{ color: '#b8860b', fontWeight: 900 }}>Admin</span></span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginRight: 24 }}>
+          {/* Thông báo admin */}
+          <button
+            onClick={() => setShowAdminNotifications(true)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#b8860b',
+              fontSize: 22,
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '6px 12px',
+              borderRadius: 8,
+              transition: 'background 0.15s',
+              position: 'relative'
+            }}
+            title="Thông báo quản lý"
+            onMouseOver={e => e.currentTarget.style.background = '#fbeee6'}
+            onMouseOut={e => e.currentTarget.style.background = 'none'}
+          >
+            <span role="img" aria-label="notifications">🔔</span>
+            {Array.isArray(adminNotifications) && adminNotifications.length > 0 && (
+              <span style={{
+                position: 'absolute',
+                top: -5,
+                right: -5,
+                background: '#ff6b6b',
+                color: 'white',
+                borderRadius: '50%',
+                width: 20,
+                height: 20,
+                fontSize: 12,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold'
+              }}>
+                {Array.isArray(adminNotifications) ? adminNotifications.length : 0}
+              </span>
+            )}
+          </button>
           <button onClick={handleGoHome} style={{ background: 'none', border: 'none', color: '#b8860b', fontSize: 22, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, transition: 'background 0.15s' }} title="Về trang người dùng" onMouseOver={e => e.currentTarget.style.background = '#fbeee6'} onMouseOut={e => e.currentTarget.style.background = 'none'}>
             <span role="img" aria-label="home">🏠</span> <span style={{ fontSize: 16, fontWeight: 700 }}>Trang khách</span>
           </button>
@@ -578,7 +649,7 @@ function AdminPage() {
                 }}>
                   <div style={{ marginBottom: 12 }}>
                     <div style={{ fontSize: 32, fontWeight: 800, letterSpacing: 1 }}>Quản lý sản phẩm</div>
-                </div>
+                  </div>
                   <div style={{ fontSize: 18, opacity: 0.9 }}>Thêm, sửa, xóa và quản lý thông tin sản phẩm trà sữa</div>
                 </div>
 
@@ -653,7 +724,7 @@ function AdminPage() {
                     gap: '20px',
                     padding: '10px 0'
                   }}>
-                        {products.map((p, idx) => (
+                    {products.map((p, idx) => (
                       <div key={p.id} style={{
                         background: '#fff',
                         borderRadius: 16,
@@ -1401,15 +1472,15 @@ function AdminPage() {
                           position: 'relative',
                           overflow: 'hidden'
                         }}
-                        onMouseEnter={(e) => {
-                          e.target.style.transform = 'translateY(-4px)';
-                          e.target.style.boxShadow = '0 8px 30px rgba(184, 134, 11, 0.2)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.transform = 'translateY(0)';
-                          e.target.style.boxShadow = '0 4px 20px rgba(184, 134, 11, 0.1)';
-                        }}>
-                          
+                          onMouseEnter={(e) => {
+                            e.target.style.transform = 'translateY(-4px)';
+                            e.target.style.boxShadow = '0 8px 30px rgba(184, 134, 11, 0.2)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 4px 20px rgba(184, 134, 11, 0.1)';
+                          }}>
+
                           {/* Header với icon và trạng thái */}
                           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 16 }}>
                             <div style={{
@@ -1426,7 +1497,7 @@ function AdminPage() {
                             }}>
                               <span style={{ fontSize: 24, color: '#b8860b' }}>🥛</span>
                             </div>
-                            
+
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{
                                 display: 'flex',
@@ -1458,7 +1529,7 @@ function AdminPage() {
                                   {material.quantity > 0 ? 'Còn hàng' : 'Hết hàng'}
                                 </span>
                               </div>
-                              
+
                               <div style={{
                                 color: '#666',
                                 fontSize: 14,
@@ -1466,7 +1537,7 @@ function AdminPage() {
                               }}>
                                 {material.category || 'Chưa phân loại'}
                               </div>
-                              
+
                               <div style={{
                                 color: '#b8860b',
                                 fontSize: 14,
@@ -1537,7 +1608,7 @@ function AdminPage() {
                             >
                               Nhập kho
                             </button>
-                            
+
                             <button
                               onClick={() => {
                                 const quantity = prompt('Nhập số lượng muốn xuất kho:');
@@ -1562,7 +1633,7 @@ function AdminPage() {
                             >
                               Xuất kho
                             </button>
-                            
+
                             <button
                               onClick={() => {
                                 setSelectedMaterial(material);
@@ -1584,7 +1655,7 @@ function AdminPage() {
                             >
                               Chi tiết
                             </button>
-                            
+
                             <button
                               onClick={() => deleteMaterial(material.id)}
                               style={{
@@ -1665,6 +1736,217 @@ function AdminPage() {
           }
         }}
       />
+
+      {/* Modal thông báo admin */}
+      {showAdminNotifications && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflow: 'auto'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '20px',
+              borderBottom: '1px solid #eee',
+              paddingBottom: '12px'
+            }}>
+              <h2 style={{ margin: 0, color: '#333', fontSize: '1.5rem' }}>🔔 Thông báo quản lý</h2>
+              <button
+                onClick={() => setShowAdminNotifications(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: '#666'
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {dashboardStats && (
+              <div style={{
+                background: '#f8f9fa',
+                borderRadius: '8px',
+                padding: '16px',
+                marginBottom: '20px',
+                border: '1px solid #e9ecef'
+              }}>
+                <h3 style={{ margin: '0 0 12px 0', color: '#333', fontSize: '1.1rem' }}>Thống kê tổng quan</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#b8860b' }}>{dashboardStats.totalMaterials}</div>
+                    <div style={{ fontSize: '0.9rem', color: '#666' }}>Tổng nguyên liệu</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ff6b6b' }}>{dashboardStats.outOfStockCount}</div>
+                    <div style={{ fontSize: '0.9rem', color: '#666' }}>Hết hàng</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ffa500' }}>{dashboardStats.lowStockCount}</div>
+                    <div style={{ fontSize: '0.9rem', color: '#666' }}>Số lượng thấp</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ff6b6b' }}>{dashboardStats.expiredCount}</div>
+                    <div style={{ fontSize: '0.9rem', color: '#666' }}>Đã hết hạn</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div style={{ marginBottom: '20px' }}>
+              {!Array.isArray(adminNotifications) || adminNotifications.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '40px 20px',
+                  color: '#666'
+                }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✅</div>
+                  <p style={{ fontSize: '1.1rem', margin: 0 }}>
+                    Không có thông báo nào cần xử lý
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p style={{
+                    color: '#666',
+                    marginBottom: '16px',
+                    fontSize: '1rem',
+                    fontWeight: '500'
+                  }}>
+                    Có {Array.isArray(adminNotifications) ? adminNotifications.length : 0} nguyên vật liệu cần chú ý:
+                  </p>
+                  {Array.isArray(adminNotifications) && adminNotifications.map((item, index) => {
+                    console.log('Rendering item:', item);
+                    return (
+                      <div
+                        key={index}
+                        style={{
+                          background: '#f8f9fa',
+                          padding: '16px',
+                          borderRadius: '8px',
+                          marginBottom: '12px',
+                          border: '1px solid #e9ecef'
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          marginBottom: '8px'
+                        }}>
+                          <strong style={{
+                            color: '#333',
+                            fontSize: '1.1rem',
+                            fontWeight: '600'
+                          }}>
+                            {item.materialName || 'Unknown Material'}
+                          </strong>
+                          <span style={{
+                            background: '#ff6b6b',
+                            color: 'white',
+                            padding: '4px 8px',
+                            borderRadius: '12px',
+                            fontSize: '0.8rem',
+                            fontWeight: '500'
+                          }}>
+                            {item.materialQuantity || 0} {item.materialUnit || 'unit'}
+                          </span>
+                        </div>
+
+                        {Array.isArray(item.notifications) && item.notifications.map((notification, notifIndex) => {
+                          console.log('Rendering notification:', notification);
+                          return (
+                            <div
+                              key={notifIndex}
+                              style={{
+                                background: notification.Severity === 'critical' ? '#ffe6e6' : '#fff3cd',
+                                border: `1px solid ${notification.Severity === 'critical' ? '#ffcccc' : '#ffeaa7'}`,
+                                borderRadius: '6px',
+                                padding: '8px 12px',
+                                marginTop: '8px'
+                              }}
+                            >
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                marginBottom: '4px'
+                              }}>
+                                <span style={{ fontSize: '1.2rem' }}>
+                                  {notification.Severity === 'critical' ? '🚨' : '⚠️'}
+                                </span>
+                                <strong style={{
+                                  color: notification.Severity === 'critical' ? '#d63031' : '#fdcb6e',
+                                  fontSize: '0.9rem'
+                                }}>
+                                  {notification.Title}
+                                </strong>
+                              </div>
+                              <p style={{
+                                margin: 0,
+                                color: '#666',
+                                fontSize: '0.9rem',
+                                lineHeight: '1.4'
+                              }}>
+                                {notification.Message}
+                              </p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              borderTop: '1px solid #eee',
+              paddingTop: '16px',
+              marginTop: '16px'
+            }}>
+              <button
+                onClick={() => setShowAdminNotifications(false)}
+                style={{
+                  background: 'linear-gradient(90deg, #b8860b, #e5d3b3)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '12px 24px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -2113,21 +2395,21 @@ function AdminAddProductModal({ open, onClose, onSuccess }) {
     setLoading(true);
     try {
       const productData = {
-          Name: name || '',
-          Price: Number(price) || 0,
-          Description: description || '',
-          Image: image || '',
-          CategoryId: Number(categoryId),
-          Category: {
-            Id: Number(categoryId),
-            Name: categories.find(c => c.id === Number(categoryId))?.name || ''
-          },
-          IsActive: true,
+        Name: name || '',
+        Price: Number(price) || 0,
+        Description: description || '',
+        Image: image || '',
+        CategoryId: Number(categoryId),
+        Category: {
+          Id: Number(categoryId),
+          Name: categories.find(c => c.id === Number(categoryId))?.name || ''
+        },
+        IsActive: true,
         IsSoldOut: isSoldOut,
-          CreatedAt: new Date().toISOString()
+        CreatedAt: new Date().toISOString()
       };
       console.log('Sending product data:', productData);
-      
+
       const res = await fetch('http://localhost:5249/api/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
